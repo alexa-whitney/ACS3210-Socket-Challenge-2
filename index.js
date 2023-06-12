@@ -9,9 +9,21 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
+// Store nickname-user mapping
+const users = {};
+
 io.on('connection', (socket) => {
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
+    socket.on('chat message', (data) => {
+        const { nickname, message } = data;
+        io.emit('chat message', { nickname, message });
+    });
+
+    socket.on('set nickname', (nickname) => {
+        users[socket.id] = nickname;
+    });
+
+    socket.on('disconnect', () => {
+        delete users[socket.id];
     });
 });
 
